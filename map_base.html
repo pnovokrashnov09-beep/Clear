@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Адрес доставки — Sharm El Sheikh</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --red: #C8102E; --red-dark: #9B0B22;
@@ -32,6 +32,7 @@
     background: transparent; color: #aaa; transition: all 0.2s; font-family: inherit;
   }
   .lang-btn.active { border-color: var(--gold); color: var(--gold); }
+  .lang-btn:hover:not(.active) { border-color: #fff; color: white; }
 
   /* CONTAINER */
   .container { max-width: 680px; margin: 0 auto; padding: 1.2rem; }
@@ -306,7 +307,7 @@ function confirmAddress() {
 
   const fullAddress = LANGS[lang].prefix + ', ' + parts.join(', ');
 
-  // Send back to opener (pizzeria.html)
+  // Send back to opener (checkout.html or index.html)
   if (window.opener && !window.opener.closed) {
     window.opener.postMessage({ type: 'address', address: fullAddress }, '*');
     window.close();
