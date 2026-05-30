@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍕 Napoli Pizza — Оформление заказа</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E; --red-dark: #9B0B22;
+    --cream: #FDF6EC; --dark: #1A1007;
+    --gold: #D4A017; --green: #2D6A4F;
+    --gray: #6B6B6B; --light: #F5EFE6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); min-height: 100vh; }
+  body.ar { font-family: 'Noto Sans Arabic', 'DM Sans', sans-serif; }
+
+  /* NAV */
+  nav {
+    background: var(--dark); display: flex; align-items: center;
+    padding: 0 1.5rem; height: 52px; gap: 1rem;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--cream); letter-spacing: 1px; }
+  .logo span { color: var(--red); }
+  .back-link {
+    color: #aaa; font-size: 0.85rem; text-decoration: none;
+    display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s;
+  }
+  .back-link:hover { color: white; }
+
+  /* FORM */
+  .wrap { max-width: 600px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
+  .form-title { font-family: 'Playfair Display', serif; font-size: 1.9rem; margin-bottom: 1.5rem; }
+  body.ar .form-title { font-family: 'Noto Sans Arabic', serif; }
+
+  /* ORDER SUMMARY */
+  .summary-box { background: white; border-radius: 14px; padding: 1.2rem; margin-bottom: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .summary-title { font-weight: 700; margin-bottom: 0.8rem; font-size: 0.95rem; }
+  .os-line { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.25rem 0; }
+  .os-line.total { font-weight: 700; font-size: 1.05rem; border-top: 1px solid #eee; margin-top: 0.5rem; padding-top: 0.75rem; }
+  .empty-msg { color: var(--gray); font-size: 0.9rem; text-align: center; padding: 1rem 0; }
+
+  /* DELIVERY */
+  .delivery-type { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+  .del-opt {
+    flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 10px;
+    cursor: pointer; text-align: center; font-weight: 500; font-size: 0.9rem;
+    transition: all 0.2s; background: white;
+  }
+  .del-opt.selected { border-color: var(--red); background: #fff5f7; color: var(--red); }
+
+  /* FORM FIELDS */
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem; border: 1.5px solid #ddd; border-radius: 10px;
+    font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s;
+    background: white; color: var(--dark);
+  }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--red); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* MAP BUTTON */
+  .map-btn {
+    margin-top: 0.5rem; width: 100%; padding: 0.6rem; border-radius: 8px;
+    border: 1.5px solid var(--red); background: white; color: var(--red);
+    font-family: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    transition: background 0.15s, color 0.15s;
+  }
+  .map-btn:hover { background: var(--red); color: white; }
+
+  /* SUBMIT */
+  .submit-btn {
+    width: 100%; background: var(--red); color: white; border: none; cursor: pointer;
+    padding: 1.1rem; border-radius: 12px; font-size: 1.05rem; font-weight: 600;
+    font-family: inherit; transition: background 0.2s, transform 0.15s; margin-top: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  /* SUCCESS */
+  .success-wrap { text-align: center; padding: 3rem 1rem; display: none; }
+  .success-wrap.show { display: block; }
+  .success-emoji { font-size: 4rem; display: block; margin-bottom: 1rem; }
+  .success-wrap h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
+  body.ar .success-wrap h2 { font-family: 'Noto Sans Arabic', serif; }
+  .success-wrap p { color: var(--gray); margin-bottom: 1.5rem; line-height: 1.6; }
+  .order-number {
+    background: var(--dark); color: white; padding: 0.9rem 2rem;
+    border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+    display: inline-block; margin-bottom: 1.5rem;
+  }
+  .success-sms { background: var(--light); border-radius: 10px; padding: 0.9rem 1.1rem; font-size: 0.88rem; margin-bottom: 1.5rem; }
+  .menu-btn {
+    background: var(--red); color: white; border: none; cursor: pointer;
+    padding: 0.9rem 2rem; border-radius: 10px; font-size: 0.95rem;
+    font-weight: 600; font-family: inherit; text-decoration: none; display: inline-block;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--dark); color: white; padding: 0.9rem 1.4rem;
+    border-radius: 12px; font-size: 0.9rem; font-weight: 500;
+    z-index: 999; transform: translateY(100px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  body.ar .toast { right: auto; left: 2rem; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+    .wrap { padding: 0 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Napoli<span>🍕</span></div>
+  <a class="back-link" href="index.html" id="backLink">← Меню</a>
+</nav>
+
+<div class="wrap" id="mainWrap">
+
+  <h2 class="form-title" id="pageTitle">Оформление заказа</h2>
+
+  <!-- ORDER SUMMARY -->
+  <div class="summary-box">
+    <div class="summary-title" id="lblYourOrder">Ваш заказ</div>
+    <div id="summaryItems"><div class="empty-msg" id="emptyMsg">Корзина пуста</div></div>
+    <div class="os-line total" id="summaryTotalRow" style="display:none">
+      <span id="lblTotal">Итого:</span>
+      <span id="summaryTotal"></span>
+    </div>
+  </div>
+
+  <!-- DELIVERY TYPE -->
+  <div class="delivery-type">
+    <div class="del-opt selected" id="optDelivery" onclick="selectDelivery('delivery',this)">🛵 Доставка</div>
+    <div class="del-opt" id="optPickup" onclick="selectDelivery('pickup',this)">🏃 Самовывоз</div>
+  </div>
+
+  <!-- FIELDS -->
+  <div class="form-row">
+    <div class="form-group">
+      <label id="lblName">Имя *</label>
+      <input type="text" id="fName" placeholder="Иван">
+    </div>
+    <div class="form-group">
+      <label id="lblPhone">Телефон *</label>
+      <input type="tel" id="fPhone" placeholder="+7 (___) ___-__-__">
+    </div>
+  </div>
+
+  <div class="form-group" id="addressGroup">
+    <label id="lblAddress">Адрес доставки *</label>
+    <input type="text" id="fAddress" placeholder="ул. Пушкина, д. 10">
+    <button class="map-btn" onclick="openMapPicker()">📍 Выбрать адрес на карте</button>
+  </div>
+
+  <div class="form-group">
+    <label id="lblComment">Комментарий</label>
+    <textarea id="fComment" rows="2" placeholder="Без лука, позвоните за 5 минут..."></textarea>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="placeOrder()">✅ Подтвердить заказ</button>
+
+</div>
+
+<!-- SUCCESS -->
+<div class="success-wrap" id="successWrap">
+  <span class="success-emoji">🎉</span>
+  <h2 id="successTitle">Заказ принят!</h2>
+  <p id="successSub">Мы уже начали готовить вашу пиццу. Ожидайте доставку через 30–45 минут.</p>
+  <div class="order-number" id="orderNum"></div>
+  <div class="success-sms" id="successSms">📱 Ожидайте подтверждение в виде СМС.</div>
+  <br>
+  <a class="menu-btn" href="index.html" id="menuBtn">← Вернуться в меню</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== i18n =====
+const LANGS = {
+  ru: {
+    backLink: '← Меню',
+    pageTitle: 'Оформление заказа',
+    lblYourOrder: 'Ваш заказ',
+    emptyMsg: 'Корзина пуста',
+    lblTotal: 'Итого:',
+    optDelivery: '🛵 Доставка',
+    optPickup: '🏃 Самовывоз',
+    lblName: 'Имя *', phName: 'Иван',
+    lblPhone: 'Телефон *',
+    lblAddress: 'Адрес доставки *', phAddress: 'ул. Пушкина, д. 10',
+    lblComment: 'Комментарий', phComment: 'Без лука, позвоните за 5 минут...',
+    submitBtn: '✅ Подтвердить заказ',
+    errName: '⚠️ Заполните имя и телефон',
+    errAddress: '⚠️ Укажите адрес доставки',
+    successTitle: 'Заказ принят!',
+    successSub: 'Мы уже начали готовить вашу пиццу. Ожидайте доставку через 30–45 минут.',
+    successSms: '📱 Ожидайте подтверждение в виде СМС, а также ориентировочное время доставки.',
+    orderWord: 'Заказ',
+    menuBtn: '← Вернуться в меню',
+  },
+  en: {
+    backLink: '← Menu',
+    pageTitle: 'Checkout',
+    lblYourOrder: 'Your Order',
+    emptyMsg: 'Cart is empty',
+    lblTotal: 'Total:',
+    optDelivery: '🛵 Delivery',
+    optPickup: '🏃 Pickup',
+    lblName: 'Name *', phName: 'John',
+    lblPhone: 'Phone *',
+    lblAddress: 'Delivery Address *', phAddress: '123 Main St',
+    lblComment: 'Comment', phComment: 'No onions, call 5 min before...',
+    submitBtn: '✅ Confirm Order',
+    errName: '⚠️ Please fill in name and phone',
+    errAddress: '⚠️ Please provide delivery address',
+    successTitle: 'Order Placed!',
+    successSub: "We've started making your pizza. Expect delivery in 30–45 minutes.",
+    successSms: '📱 Please wait for confirmation via SMS.',
+    orderWord: 'Order',
+    menuBtn: '← Back to Menu',
+  },
+  ar: {
+    backLink: 'القائمة ←',
+    pageTitle: 'إتمام الطلب',
+    lblYourOrder: 'طلبك',
+    emptyMsg: 'السلة فارغة',
+    lblTotal: 'المجموع:',
+    optDelivery: '🛵 توصيل',
+    optPickup: '🏃 استلام',
+    lblName: 'الاسم *', phName: 'محمد',
+    lblPhone: 'الهاتف *',
+    lblAddress: 'عنوان التوصيل *', phAddress: 'شارع الملك، مبنى 10',
+    lblComment: 'ملاحظات', phComment: 'بدون بصل...',
+    submitBtn: '✅ تأكيد الطلب',
+    errName: '⚠️ يرجى إدخال الاسم والهاتف',
+    errAddress: '⚠️ يرجى إدخال عنوان التوصيل',
+    successTitle: 'تم استلام الطلب!',
+    successSub: 'بدأنا في تحضير بيتزاك. توقع التوصيل خلال 30–45 دقيقة.',
+    successSms: '📱 يرجى انتظار تأكيد عبر الرسائل النصية.',
+    orderWord: 'طلب',
+    menuBtn: '→ العودة للقائمة',
+  }
+};
+
+// ===== CURRENCY =====
+const CURRENCIES = {
+  rub: { symbol: '₽', rate: 1,     decimals: 0, before: false },
+  usd: { symbol: '$', rate: 0.011, decimals: 2, before: true  },
+  egp: { symbol: 'ج.م', rate: 0.55, decimals: 2, before: false },
+};
+
+// ===== STATE =====
+let lang     = localStorage.getItem('napoli_lang')     || 'ru';
+let currency = localStorage.getItem('napoli_currency') || 'rub';
+let cart     = JSON.parse(localStorage.getItem('napoli_cart') || '[]');
+let deliveryType = 'delivery';
+
+function t(key) { return (LANGS[lang] && LANGS[lang][key]) || LANGS.ru[key] || key; }
+
+function formatPrice(rubPrice) {
+  const cur = CURRENCIES[currency];
+  const val = rubPrice * cur.rate;
+  const fmt = val.toFixed(cur.decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return cur.before ? cur.symbol + fmt : fmt + ' ' + cur.symbol;
+}
+
+// ===== APPLY LANG =====
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.classList.toggle('ar', lang === 'ar');
+
+  document.getElementById('backLink').textContent  = t('backLink');
+  document.getElementById('pageTitle').textContent  = t('pageTitle');
+  document.getElementById('lblYourOrder').textContent = t('lblYourOrder');
+  document.getElementById('emptyMsg').textContent   = t('emptyMsg');
+  document.getElementById('lblTotal').textContent   = t('lblTotal');
+  document.getElementById('optDelivery').textContent = t('optDelivery');
+  document.getElementById('optPickup').textContent  = t('optPickup');
+  document.getElementById('lblName').textContent    = t('lblName');
+  document.getElementById('fName').placeholder      = t('phName');
+  document.getElementById('lblPhone').textContent   = t('lblPhone');
+  document.getElementById('lblAddress').textContent = t('lblAddress');
+  document.getElementById('fAddress').placeholder   = t('phAddress');
+  document.getElementById('lblComment').textContent = t('lblComment');
+  document.getElementById('fComment').placeholder   = t('phComment');
+  document.getElementById('submitBtn').textContent  = t('submitBtn');
+  document.getElementById('menuBtn').textContent    = t('menuBtn');
+  document.getElementById('successTitle').textContent = t('successTitle');
+  document.getElementById('successSub').textContent   = t('successSub');
+  document.getElementById('successSms').textContent   = t('successSms');
+}
+
+// ===== RENDER SUMMARY =====
+function renderSummary() {
+  const el = document.getElementById('summaryItems');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const totalRow = document.getElementById('summaryTotalRow');
+
+  if (!cart.length) {
+    el.innerHTML = '<div class="empty-msg">' + t('emptyMsg') + '</div>';
+    totalRow.style.display = 'none';
+    return;
+  }
+
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  el.innerHTML = cart.map(c =>
+    `<div class="os-line">
+      <span>${c.emoji} ${c.name}${c.size ? ' (' + c.size + ')' : ''} × ${c.qty}</span>
+      <span>${formatPrice(c.price * c.qty)}</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('summaryTotal').textContent = formatPrice(total);
+  totalRow.style.display = 'flex';
+}
+
+// ===== DELIVERY =====
+function selectDelivery(type, el) {
+  deliveryType = type;
+  document.querySelectorAll('.del-opt').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('addressGroup').style.display = type === 'delivery' ? 'block' : 'none';
+}
+
+// ===== MAP PICKER =====
+function openMapPicker() {
+  const w = 680, h = 640;
+  const left = Math.max(0, (screen.width  - w) / 2);
+  const top  = Math.max(0, (screen.height - h) / 2);
+  window.open(
+    'map_base.html',
+    'addressPicker',
+    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`
+  );
+}
+
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'address') {
+    document.getElementById('fAddress').value = e.data.address;
+  }
+});
+
+// ===== PLACE ORDER =====
+function placeOrder() {
+  const name    = document.getElementById('fName').value.trim();
+  const phone   = document.getElementById('fPhone').value.trim();
+  const address = deliveryType === 'delivery' ? document.getElementById('fAddress').value.trim() : '';
+
+  if (!name || !phone) { showToast(t('errName')); return; }
+  if (deliveryType === 'delivery' && !address) { showToast(t('errAddress')); return; }
+
+  const num = '#' + (Math.floor(Math.random() * 9000) + 1000);
+  document.getElementById('orderNum').textContent = t('orderWord') + ' ' + num;
+
+  // Clear cart
+  localStorage.removeItem('napoli_cart');
+
+  // Show success
+  document.getElementById('mainWrap').style.display = 'none';
+  const sw = document.getElementById('successWrap');
+  sw.classList.add('show');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== INIT =====
+applyLang();
+renderSummary();
+</script>
+</body>
+</html>
